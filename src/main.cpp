@@ -1370,8 +1370,6 @@ void CheckForkWarningConditionsOnNewFork(CBlockIndex* pindexNewForkTip)
 // Requires cs_main.
 void Misbehaving(NodeId pnode, int howmuch)
 {
-    return;
-
     if (howmuch == 0)
         return;
 
