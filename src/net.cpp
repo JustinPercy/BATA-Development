@@ -501,7 +501,7 @@ bool CNode::IsBanned(CNetAddr ip)
     return fResult;
 }
 
-bool CNode::Ban(const CNetAddr &addr) {
+bool CNode::Ban(const CNetAddr &addr, const BanReason &banReason, int64_t bantimeoffset, bool sinceUnixEpoch) {
     int64_t banTime = GetTime()+GetArg("-bantime", 60*60*24);  // Default 24-hour ban
     {
         LOCK(cs_setBanned);
@@ -1636,14 +1636,25 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
 
     if (!pnode)
         return false;
-    if (grantOutbound)
-        FireWall(pnode, "OpenNetConnection");
-        grantOutbound->MoveTo(pnode->grantOutbound);
-    pnode->fNetworkNode = true;
-    if (fOneShot)
-        pnode->fOneShot = true;
+        
+    FireWall(pnode, "OpenNetConnection");
 
-    return true;
+
+        if (grantOutbound)
+        {
+            grantOutbound->MoveTo(pnode->grantOutbound);
+        }
+
+        pnode->fNetworkNode = true;
+
+        if (fOneShot)
+        {
+            pnode->fOneShot = true;
+        }
+
+        return true;
+
+
 }
 
 void ThreadMessageHandler()
