@@ -1267,8 +1267,12 @@ CAmount GetBlockValue(int nHeight, const CAmount& nFees)
     if (nHeight == 2)
         nSubsidy = 1 * COIN;
 
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
+    // Bata: Subsidy is cut in half every 100,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= halvings;
+
+    if (nHeight >= 850000)
+        nSubsidy = (1 * COIN)/4 ;  //Static PoW reward of 0.25 Bata until end of PoW (10 Million Bata)
+
 
     return nSubsidy + nFees;
 }
@@ -1471,10 +1475,17 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
 
             // If prev is coinbase, check that it's matured
             if (coins->IsCoinBase()) {
-                if (nSpendHeight - coins->nHeight < COINBASE_MATURITY)
-                    return state.Invalid(
-                        error("CheckInputs() : tried to spend coinbase at depth %d", nSpendHeight - coins->nHeight),
-                        REJECT_INVALID, "bad-txns-premature-spend-of-coinbase");
+                if (pindexPrev->nHeight >= 850000) {
+                    if (nSpendHeight - coins->nHeight < COINBASE_MATURITY_850k)
+                        return state.Invalid(
+                            error("CheckInputs() : tried to spend coinbase at depth %d", nSpendHeight - coins->nHeight),
+                            REJECT_INVALID, "bad-txns-premature-spend-of-coinbase");
+                }
+                else
+                    if (nSpendHeight - coins->nHeight < COINBASE_MATURITY)
+                        return state.Invalid(
+                            error("CheckInputs() : tried to spend coinbase at depth %d", nSpendHeight - coins->nHeight),
+                            REJECT_INVALID, "bad-txns-premature-spend-of-coinbase");
             }
 
             // Check for negative or overflow input values
